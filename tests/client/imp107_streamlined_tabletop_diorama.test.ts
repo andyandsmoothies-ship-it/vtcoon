@@ -169,11 +169,11 @@ describe('[UC-IMP107/MSS] Streamlined Tabletop Diorama & Zero Outer Ring Clutter
   // =========================================================================
 
   describe('Facet 4: Center Diorama Integrity & Backward Compatibility', () => {
-    it('[UC-IMP107/MSS-F4.1] CoastalIslandEnvironment with streamlined=false restores full island terrain and trees', () => {
+    it('[UC-IMP107/MSS-F4.1] CoastalIslandEnvironment with streamlined=false mounts archipelago diorama without legacy lawn', () => {
       const html = renderToStaticMarkup(React.createElement(CoastalIslandEnvironment, { streamlined: false }));
-      expect(html).toContain('data-testid="tropical-palms-cluster"');
-      expect(html).toContain('data-testid="layered-tropical-foliage"');
-      expect(html).toContain('args="13.2,0.32,5.4"');
+      expect(html).toContain('data-testid="horizon-mountain-range"');
+      expect(html).toContain('data-testid="coastal-patrol-boat"');
+      expect(html).not.toContain('args="15.6,17.6,0.26,64"');
     });
 
     it('[UC-IMP107/MSS-F4.2] GameBoard preserves MiniatureCityDiorama center city landmarks 100%', () => {
@@ -181,6 +181,10 @@ describe('[UC-IMP107/MSS] Streamlined Tabletop Diorama & Zero Outer Ring Clutter
       expect(html).toContain('data-testid="miniature-city-diorama"');
       expect(html).toContain('data-testid="diorama-board-rim"');
       expect(html).toContain('data-testid="central-monument-plaza"');
+    });
+
+    it('[UC-IMP107/MSS-F4.3] GameBoard preserves pedestrian promenades and urban canopy', () => {
+      const html = renderToStaticMarkup(React.createElement(GameBoard));
       expect(html).toContain('data-testid="diorama-pedestrian-promenades"');
       expect(html).toContain('data-testid="diorama-urban-canopy"');
     });

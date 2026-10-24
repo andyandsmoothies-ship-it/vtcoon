@@ -5,10 +5,7 @@ import type { Mesh } from 'three';
 import { TropicalWater } from './tropical_water';
 import { CoastalPatrolBoat } from './coastal_patrol_boat';
 import { CoastalSeagulls } from './coastal_seagulls';
-import { LayeredTropicalFoliage } from './layered_tropical_foliage';
 import { HorizonMountainRange } from './horizon_mountain_range';
-import { TropicalPalmsCluster } from './tropical_palms_cluster';
-import { AirportLandmark, TrainStationLandmark } from './coastal_island_landmarks';
 import { useSafeFrame } from './safe_frame';
 import { SafeGLTFModel } from './asset_loader/safe_gltf_model';
 import { VEHICLE_MODEL_URLS } from './diorama/diorama_traffic';
@@ -22,6 +19,7 @@ import { WarRoomStageLayer } from './war_room_stage_layer';
 import { computeQuadrantCounts, validateSectorBalance } from './spatial_geometry_helpers';
 
 export const COASTAL_ARCHIPELAGO_BASE_MODEL_URL = '/models/board/coastal_archipelago_base.glb' as const;
+SafeGLTFModel.preload(COASTAL_ARCHIPELAGO_BASE_MODEL_URL);
 
 export function ContainerShipProceduralFallback(): React.ReactElement {
   return (
@@ -195,109 +193,9 @@ export const CoastalIslandEnvironment: ((props: CoastalIslandEnvironmentProps) =
           position={[0, 0, 0]}
           receiveShadow
           castShadow={!isMobile}
-          fallback={
-            <>
-              {/* Cao nguyên cỏ xanh nhiệt đới viền quanh bàn cờ (Lush Tropical Lawn Plateau, #22C55E) */}
-          <mesh receiveShadow position={[0, -0.34, 0]}>
-            <cylinderGeometry args={[15.6, 17.6, 0.26, 64]} />
-            <meshStandardMaterial color="#22C55E" roughness={0.78} metalness={0.02} />
-          </mesh>
-
-          {/* Bờ biển cát vát nghiêng ngà mịn tự nhiên (Sloped Fine Ivory Shoreline, #EFE5D8, roughness: 0.85) */}
-          <mesh receiveShadow position={[0, -0.36, 0]}>
-            <cylinderGeometry args={[17.4, 21.0, 0.24, 64]} />
-            <meshStandardMaterial color="#EFE5D8" roughness={0.85} metalness={0.02} />
-          </mesh>
-
-          {/* Gờ vát nghiêng bờ cát chuẩn 15 độ tiếp giáp nước biển */}
-          <mesh receiveShadow position={[0, -0.75, 0]}>
-            <cylinderGeometry args={[27.8, 28.85, 0.28, 64]} />
-            <meshStandardMaterial color="#EFE5D8" roughness={0.85} metalness={0.02} />
-          </mesh>
-
-          <mesh receiveShadow position={[0, -0.38, 0]}>
-            <cylinderGeometry args={[16.2, 17.5, 0.14, 48]} />
-            <meshStandardMaterial color="#F3EBE1" roughness={0.85} metalness={0.02} />
-          </mesh>
-
-          {/* Mũi bãi tắm & đảo ngoại vi 4 góc phần tư rải đều (IMP-420 Quadrant Guard) */}
-          {DEFAULT_BALANCED_ISLAND_DIORAMA.props.map((p) => (
-            <mesh key={p.id} receiveShadow position={[...p.position]}>
-              <cylinderGeometry args={[p.topRadius, p.bottomRadius, p.height, p.segments]} />
-              <meshStandardMaterial
-                color={p.color ?? '#EFE5D8'}
-                roughness={p.roughness ?? 0.85}
-                metalness={p.metalness ?? 0.02}
-              />
-            </mesh>
-          ))}
-
-          {/* Dù che nắng bãi biển đa sắc */}
-          {([
-            [-12.2, 8.2, '#EF4444'],
-            [-13.2, 9.5, '#F59E0B'],
-            [-11.8, 10.5, '#3B82F6'],
-            [-10.8, 9.0, '#10B981'],
-          ] as const).map(([bx, bz, color], uIdx) => (
-            <group key={`umbrella-${uIdx}`} position={[bx, -0.25, bz]}>
-              <mesh position={[0, 0.4, 0]}>
-                <cylinderGeometry args={[0.02, 0.02, 0.8, 6]} />
-                <meshStandardMaterial color="#F8FAFC" metalness={0.7} />
-              </mesh>
-              <mesh position={[0, 0.78, 0]} rotation={[0.1, 0, 0.1]}>
-                <coneGeometry args={[0.55, 0.25, 8]} />
-                <meshStandardMaterial color={color} roughness={0.3} />
-              </mesh>
-              <mesh position={[0.2, 0.04, 0]} rotation={[0, 0.3, -0.1]}>
-                <boxGeometry args={[0.42, 0.05, 0.22]} />
-                <meshStandardMaterial color="#FFFFFF" roughness={0.4} />
-              </mesh>
-            </group>
-          ))}
-
-          {/* 3. Thảm thực vật nhiệt đới đa tầng & rừng dừa 60 cây (IMP-30) */}
-          <LayeredTropicalFoliage />
-          <TropicalPalmsCluster />
-
-          {/* 6. Hạ tầng kết nối: Cầu cạn, Ga xe lửa Đông Nam & Sân bay Tây Bắc */}
-          <group position={[-18, -0.26, 18]} rotation={[0, 0.78, 0]}>
-            <mesh castShadow receiveShadow position={[0, 0.1, 0]}>
-              <boxGeometry args={[12, 0.18, 1.4]} />
-              <meshStandardMaterial color="#CBD5E1" roughness={0.5} />
-            </mesh>
-            {[-4, 0, 4].map((px) => (
-              <mesh key={`pier-${px}`} position={[px, -0.2, 0]}>
-                <cylinderGeometry args={[0.25, 0.3, 0.6, 8]} />
-                <meshStandardMaterial color="#64748B" roughness={0.7} />
-              </mesh>
-            ))}
-          </group>
-          <TrainStationLandmark />
-          <AirportLandmark />
-
-          {/* Tàu Container Tây Nam & Du thuyền ven bãi tắm (Ngoại vi bãi cát Tây - chỉ hiện khi streamlined=false) */}
-          <group position={[-15.0, -0.30, 9.5]} rotation={[0, -0.85, 0]} scale={[0.75, 0.75, 0.75]}>
-            <SafeGLTFModel url={VEHICLE_MODEL_URLS.container} fallback={<ContainerShipProceduralFallback />} castShadow receiveShadow />
-            <mesh position={[6.2, 0.05, 0]}>
-              <planeGeometry args={[4.2, 1.8]} />
-              <meshBasicMaterial color="#FFFFFF" transparent opacity={0.4} />
-            </mesh>
-          </group>
-
-          <group position={[-11.5, -0.30, 12.0]} rotation={[0, 0.6, 0]}>
-            <mesh castShadow position={[0, 0.25, 0]}>
-              <boxGeometry args={[3.2, 0.4, 1.0]} />
-              <meshStandardMaterial color="#FFFFFF" roughness={0.2} metalness={0.1} />
-            </mesh>
-            <mesh castShadow position={[0.2, 0.55, 0]}>
-              <boxGeometry args={[1.6, 0.35, 0.7]} />
-              <meshStandardMaterial color="#0284C7" roughness={0.2} />
-            </mesh>
-          </group>
-        </>
-      }
-    />
-  )}
+          fallback={null}
+        />
+      )}
 
       {/* 4. Rặng núi chân trời phía Bắc với tháp radar vi mô (#166534, #15803D, #22C55E) */}
       <HorizonMountainRange />

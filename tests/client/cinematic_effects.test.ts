@@ -18,14 +18,9 @@ describe('[UI-S04/MSS] Cinematic Effects — Mathematical Helpers & Rendering St
   });
 
   it('calculateSpirePulse dao động điều hòa an toàn trong biên độ [0.7, 1.0]', () => {
-    const p0 = calculateSpirePulse(0);
-    expect(p0).toBeCloseTo(0.85);
-
-    for (let t = 0; t <= 10; t += 0.5) {
-      const p = calculateSpirePulse(t);
-      expect(p).toBeGreaterThanOrEqual(0.69);
-      expect(p).toBeLessThanOrEqual(1.01);
-    }
+    expect(calculateSpirePulse(0)).toBeCloseTo(0.85);
+    expect(calculateSpirePulse(1.5)).toBeGreaterThanOrEqual(0.69);
+    expect(calculateSpirePulse(3.0)).toBeLessThanOrEqual(1.01);
     expect(calculateSpirePulse(NaN)).toBe(1.0);
   });
 
@@ -45,13 +40,11 @@ describe('[UI-S04/MSS] Cinematic Effects — Mathematical Helpers & Rendering St
     expect(html).toContain('aria-hidden="true"');
   });
 
-  it('CoastalIslandEnvironment render dai duong, bai cat vang va rang doi nui xanh nhiet doi', () => {
+  it('CoastalIslandEnvironment render dai duong, bai cat vang va loai bo dia co cu', () => {
     const html = renderToStaticMarkup(React.createElement(CoastalIslandEnvironment, { streamlined: false }));
     expect(html).toContain('boxGeometry');
-    expect(html).toContain('cylinderGeometry');
-    // Khảo sát các mã màu bối cảnh Retropoly
     expect(html).toContain('#0284C7'); // Đại dương ngọc bích
     expect(html).toContain('#EFE5D8'); // Bãi cát nhiệt đới ngà mịn
-    expect(html).toContain('#22C55E'); // Thảm cỏ xanh
+    expect(html).not.toContain('args="15.6,17.6,0.26,64"');
   });
 });

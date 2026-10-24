@@ -1,0 +1,86 @@
+[
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: remove module-scope asset preloading for coastal archipelago base GLB",
+    "target": "SafeGLTFModel.preload(COASTAL_ARCHIPELAGO_BASE_MODEL_URL);",
+    "replacement": "// SafeGLTFModel.preload disabled"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: corrupt coastal archipelago GLB URL constant",
+    "target": "export const COASTAL_ARCHIPELAGO_BASE_MODEL_URL = '/models/board/coastal_archipelago_base.glb' as const;",
+    "replacement": "export const COASTAL_ARCHIPELAGO_BASE_MODEL_URL = '/models/board/corrupted_path.glb' as const;"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: revert fallback={null} back to procedural cylinder with args [15.6, 17.6, 0.26, 64]",
+    "target": "fallback={null}",
+    "replacement": "fallback={<mesh><cylinderGeometry args={[15.6, 17.6, 0.26, 64]} /></mesh>}"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: reintroduce Lush Tropical Lawn Plateau into source code",
+    "target": "{/* 2. Các khối ngoại vi hòn đảo (Được ẩn ở chế độ streamlined để giải phóng tối đa tầm nhìn bàn cờ) */}",
+    "replacement": "{/* Lush Tropical Lawn Plateau */}"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: reintroduce LayeredTropicalFoliage import and render",
+    "target": "import { TropicalWater } from './tropical_water';",
+    "replacement": "import { TropicalWater } from './tropical_water';\nimport { LayeredTropicalFoliage } from './layered_tropical_foliage';"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: reintroduce TropicalPalmsCluster import into source code",
+    "target": "import { CoastalPatrolBoat } from './coastal_patrol_boat';",
+    "replacement": "import { CoastalPatrolBoat } from './coastal_patrol_boat';\nimport { TropicalPalmsCluster } from './tropical_palms_cluster';"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: corrupt fallback to render legacy tropical palms cluster in SSR",
+    "target": "fallback={null}",
+    "replacement": "fallback={<group data-testid=\"tropical-palms-cluster\" />}"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: corrupt fallback to render legacy layered tropical foliage in SSR",
+    "target": "fallback={null}",
+    "replacement": "fallback={<group data-testid=\"layered-tropical-foliage\" />}"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: remove horizon mountain range component from living diorama",
+    "target": "<HorizonMountainRange />",
+    "replacement": "{/* <HorizonMountainRange /> */}"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: remove coastal patrol boat component from living diorama",
+    "target": "<CoastalPatrolBoat isMobile={isMobile} />",
+    "replacement": "{/* <CoastalPatrolBoat isMobile={isMobile} /> */}"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: remove coastal seagulls flock animation from living diorama",
+    "target": "<CoastalSeagulls isMobile={isMobile} />",
+    "replacement": "{/* <CoastalSeagulls isMobile={isMobile} /> */}"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: corrupt source to reintroduce legacy lawn cylinder args token",
+    "target": "export const COASTAL_ARCHIPELAGO_BASE_MODEL_URL = '/models/board/coastal_archipelago_base.glb' as const;",
+    "replacement": "export const COASTAL_ARCHIPELAGO_BASE_MODEL_URL = '/models/board/coastal_archipelago_base.glb' as const; // args={[15.6, 17.6, 0.26, 64]}"
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: break SafeGLTFModel URL prop wiring for coastal archipelago",
+    "target": "url={COASTAL_ARCHIPELAGO_BASE_MODEL_URL}",
+    "replacement": "url=\"/models/other.glb\""
+  },
+  {
+    "file": "src/client/3d/coastal_island_environment.tsx",
+    "desc": "AST: corrupt fallback={null} to non-null value",
+    "target": "fallback={null}",
+    "replacement": "fallback=\"legacy_lawn\""
+  }
+]

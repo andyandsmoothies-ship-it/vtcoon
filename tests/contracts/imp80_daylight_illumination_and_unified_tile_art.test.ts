@@ -310,16 +310,16 @@ describe('[TC-IMP80/MSS][UC-IMP80] Daylight Zoom Illumination & Unified Tile Art
       expect(content).not.toContain('#FDE68A');
     });
 
-    it('[TC-80.18/MSS][IMP-80] CoastalIslandEnvironment renders lush tropical green lawn plateau #22C55E around board', () => {
+    it('[TC-80.18/MSS][IMP-80] CoastalIslandEnvironment purges legacy lush tropical green lawn plateau', () => {
       const filePath = path.resolve('src/client/3d/coastal_island_environment.tsx');
       const content = fs.readFileSync(filePath, 'utf-8');
-      expect(content).toContain('color="#22C55E"');
+      expect(content).not.toContain('Lush Tropical Lawn Plateau');
     });
 
-    it('[TC-80.19/MSS][IMP-80] CoastalIslandEnvironment uses soft ivory sand #F3EBE1 for upper shoreline accents', () => {
+    it('[TC-80.19/MSS][IMP-80] CoastalIslandEnvironment purges legacy soft ivory sand accent color #F3EBE1', () => {
       const filePath = path.resolve('src/client/3d/coastal_island_environment.tsx');
       const content = fs.readFileSync(filePath, 'utf-8');
-      expect(content).toContain('color="#F3EBE1"');
+      expect(content).not.toContain('color="#F3EBE1"');
     });
   });
 

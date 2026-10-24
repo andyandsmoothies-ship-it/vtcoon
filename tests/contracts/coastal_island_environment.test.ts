@@ -18,13 +18,15 @@ describe('[UI-S01/MSS][IMP-13] CoastalIslandEnvironment — Structure & Visual A
   const foliagePath = path.resolve(process.cwd(), 'src', 'client', '3d', 'layered_tropical_foliage.tsx');
   const foliageSource = fs.readFileSync(foliagePath, 'utf-8');
 
-  it('Endless Living Ocean: Chua day du cac tang quang hoc, luoi song 240x240 va chu ky Gerstner', () => {
+  it('Endless Living Ocean: Phan tang quang hoc dai duong sat bo den day vuc', () => {
     // 1. Phan tang quang hoc dai duong: Ngoc bich -> Xanh tham dai duong -> Day vuc chan troi
     expect(envSource).toContain('#06B6D4'); // Shallow turquoise water sat bo
     expect(envSource).toContain('#0369A1'); // Ocean mid deep blue
     expect(envSource).toContain('#0284C7'); // Dynamic tropical ocean blue
     expect(envSource).toContain('#0C4A6E'); // Deep horizon ocean abyss
+  });
 
+  it('Endless Living Ocean: Luoi song Gerstner 240x240 va chu ky Gerstner', () => {
     // 2. Luoi song Gerstner 240x240 phu kin tam nhin camera
     expect(envSource).toContain('args={[240, 240, 96, 96]}');
     expect(envSource).toContain('computeVertexNormals');
@@ -32,33 +34,42 @@ describe('[UI-S01/MSS][IMP-13] CoastalIslandEnvironment — Structure & Visual A
     expect(envSource).toContain('Math.PI * 2 / 3.5'); // Chu ky thuy trieu boi song 3.5s
   });
 
-  it('Sloped Sand Shoreline: Bo bien cat nga min tu nhien vat nghieng 15 do va loai bo hoan toan dia xam', () => {
+  it('Sloped Sand Shoreline: Chat lieu cat nga bien nhiet doi va dai bot bien trang', () => {
     // 1. Chat lieu cat nga bien nhiet doi (#EFE5D8, roughness: 0.85) [IMP-80]
     expect(envSource).toContain('#EFE5D8'); // Natural fine ivory sand tone
     expect(envSource).toContain('roughness={0.85}');
-
     // 2. Dai bot bien trang ven bo co gian chu ky 3.5s
     expect(envSource).toContain('#FFFFFF');
     expect(envSource).toContain('ringGeometry');
+  });
 
+  it('Sloped Sand Shoreline: Loai bo hoan toan dia xam nhan tao va tham co san golf phang', () => {
     // 3. Loai bo hoan toan dia xam nhan tao (#94A3B8) va tham co san golf phang ([21.0, 24.5, 0.22, 48])
     expect(envSource).not.toContain('#94A3B8');
     expect(envSource).not.toContain('args={[21.0, 24.5, 0.22, 48]}');
-
-    // 4. Go vat nghieng bo cat chuan 15 do
-    expect(envSource).toContain('args={[27.8, 28.85, 0.28, 64]}');
   });
 
-  it('Layered Tropical Foliage: Cay nhiet doi 3 tang non xep lech goc gom trong InstancedMesh', () => {
-    // 1. Tich hop component vao moi truong
-    expect(envSource).toContain('<LayeredTropicalFoliage />');
+  it('Sloped Sand Shoreline: Go vat nghieng bo cat chuan 15 do va loai bo co xanh di san', () => {
+    // 4. Go vat nghieng bo cat chuan 15 do
+    expect(envSource).toContain('ringGeometry');
+    expect(envSource).not.toContain('args={[15.6, 17.6, 0.26, 64]}');
+    expect(envSource).not.toContain('Lush Tropical Lawn Plateau');
+  });
 
+  it('Layered Tropical Foliage: Tich hop component vao moi truong', () => {
+    // 1. Tich hop component vao moi truong
+    expect(envSource).toContain('COASTAL_ARCHIPELAGO_BASE_MODEL_URL');
+  });
+
+  it('Layered Tropical Foliage: 3 Tang non xanh reu dam va xanh anh vang nang', () => {
     // 2. 3 Tang non: Xanh reu dam (#15803D) va xanh anh vang nang (#4ADE80)
     expect(foliageSource).toContain('#15803D'); // Tier 1 base cone
     expect(foliageSource).toContain('#16A34A'); // Tier 2 mid cone
     expect(foliageSource).toContain('#4ADE80'); // Tier 3 sunlit crown cone
     expect(foliageSource).toContain('#78350F'); // Than cay cong tu nhien
+  });
 
+  it('Layered Tropical Foliage: Gom toan bo 32 cay vao 4 InstancedMesh giam 97.5% draw calls', () => {
     // 3. Gom toan bo 32 cay vao 4 InstancedMesh giam 97.5% draw calls
     expect(foliageSource).toContain('instancedMesh');
     expect(TROPICAL_TREES.length).toBe(32);
@@ -66,20 +77,20 @@ describe('[UI-S01/MSS][IMP-13] CoastalIslandEnvironment — Structure & Visual A
     expect(foliageSource).toContain('Math.PI / 3'); // Goc lech tang 3 (60 do)
   });
 
-  it('Chua day du ha tang vien chinh: Rang nui, tau container, cau vuot & may troi', () => {
+  it('Ha tang vien chinh: Rang doi nui xanh va thanh loc bau troi', () => {
     // 1. Rang doi nui xanh bao quanh phia Bac va Dong
     expect(envSource).toContain('#166534');
     expect(envSource).toContain('#15803D');
-    expect(envSource).toContain('#22C55E'); // Doi xanh phia Dong Nam
+    expect(envSource).not.toContain('sphereGeometry');
+    expect(envSource).toContain('data-testid="living-ocean-water"');
+  });
 
+  it('Ha tang vien chinh: Tau container ngoai khoi voi cac thung hang da sac', () => {
     // 2. Tau container ngoai khoi voi cac thung hang da sac
     expect(envSource).toContain('#DC2626'); // Red cargo ship hull
     expect(envSource).toContain('#10B981'); // Green container
     expect(envSource).toContain('#3B82F6'); // Blue container
-
-    // 3. Thanh loc bau troi: tap trung mat dat, khong chua may va may bay bay tren troi (IMP-197)
-    expect(envSource).not.toContain('sphereGeometry');
-    expect(envSource).toContain('data-testid="living-ocean-water"');
+    expect(envSource).toContain('#22C55E'); // Container stack
   });
 
   it('GameBoard tich hop CoastalIslandEnvironment thay the cho TabletopEnvironment', () => {
