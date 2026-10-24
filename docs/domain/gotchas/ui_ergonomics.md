@@ -14,8 +14,9 @@
 3. **Root-Level Sticky Action Footer**:
    - Modal action button clusters MUST be direct children of the root container (`sticky bottom-0`), never nested within inner scroll containers.
 
-4. **4 Anti-Pattern Filter**:
-   - FORBIDDEN: (1) `border-accent-on-rounded`, (2) `bounce-easing`, (3) `gray-on-color`, (4) `gradient-text`. Enforced mechanically via `npm run lint:ui`.
+4. **10 Impeccable Anti-Pattern Filters & Quality Floor**:
+   - FORBIDDEN: (1) `border-accent-on-rounded` (asymmetric border on rounded corner), (2) `bounce-easing` (rubber-band overshoot > 1.0), (3) `gray-on-color` (muddy dark text on saturated chromatic bg), (4) `gradient-text` (clipped gradient legibility break), (5) `undersized-ui-text` (< 11px on interactive labels), (6) `first-viewport-column-overflow` (column pushing action CTA below vertical fold), (7) `cramped-padding` (padding < 8px without `min-w-0 truncate`), (8) `nested-cards` (gray card inside gray card visual mud), (9) `side-tab` (stereotypical AI thick left/right edge border), (10) `clipped-overflow-container` (`overflow-hidden` clipping interactive popovers/tooltips). Enforced mechanically via `npm run lint:ui`.
+   - UI Review & Polish MUST leverage the 6 Core Cognitive Verbs: `distill` (strip visual clutter/nesting), `bolder` (assertive CTA hierarchy & mechanical drop shadows), `quieter` (soften peripheral data & tone down noise), `harden` (bulletproof bounds at 360px & touch floor >= 44px), `typeset` (typography scale & contrast floor), `delight` (tactile press travel `active:translate-y-[2px]`).
 
 5. **Strict Intent Callback Isolation**:
    - Action buttons dispatching server intents (`onBuy`, `onPass`, `onBid`) are FORBIDDEN from using silent fallback to UI closing handlers (`onPass ?? onClose`). UI dismissal buttons call `onClose` separately.

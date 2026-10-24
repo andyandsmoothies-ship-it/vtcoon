@@ -1,30 +1,30 @@
 ---
 name: impeccable
-description: High-craft tactile 2D UI/UX design, review, and polish skill for commercial games under Antigravity 2.0. Directs critique, audit, polish, optimize workflows, motion budget, and tactile shadows. Integrates 24-command Impeccable engine and launcher CLI.
+description: High-craft tactile 2D UI/UX design, review, and polish skill for commercial games under Antigravity 2.0. Directs critique, audit, polish, optimize workflows, motion budget, and tactile shadows. Pure-prompting Impeccable Lite standard with zero external binary dependencies.
 ---
 
-# TACTILE 2D UI/UX DESIGN SKILL (IMPECCABLE STANDARD)
+# TACTILE 2D UI/UX DESIGN SKILL (IMPECCABLE LITE STANDARD)
 
-## 1. SESSION CONTEXT SETUP
+## 1. SESSION CONTEXT SETUP (ZERO-BINARY ARCHITECTURE)
 
-At the start of any session involving 2D UI/UX design, styling, or auditing, run the launcher once to load project context (`PRODUCT.md`, `DESIGN.md`, surface brief):
+Impeccable Lite operates purely via cognitive heuristics, AST linter rules, and design constraints without requiring external Rust binaries, browser extension daemons, or background port listeners.
 
-```cmd
-cmd /c .agents\skills\impeccable\scripts\impeccable.cmd context
+When starting a 2D UI/UX task:
+1. Consult the project design system in [`DESIGN.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/DESIGN.md) or [`docs/domain/design.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/design.md).
+2. Reference the Viewport Ergonomics Gotchas: [`docs/domain/gotchas/ui_ergonomics.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/gotchas/ui_ergonomics.md).
+3. Validate mechanical conformance at any time via:
+```bash
+npm run lint:ui
 ```
-
-*Notes*:
-- Pass a target file path via `--target <path>` (e.g. `--target src/client/ui/player_card.tsx`).
-- The launcher connects to the standalone `impeccable-engine` binary on Windows x64.
 
 ---
 
 ## 2. TACTILE LUXURY PHILOSOPHY
 
-The **Impeccable** standard ensures 2D UI matches commercial game quality, synchronizing aesthetically with the 3D React Three Fiber (R3F) board in `vtcoon`.
+The **Impeccable Lite** standard ensures 2D UI matches commercial game quality, synchronizing aesthetically with the 3D React Three Fiber (R3F) diorama in `vtcoon`.
 
-1. **Physical Weight & Tactile Snap**: UI elements (Title Deed cards, buttons, control trays, modals) are not flat 2D planes. They must feel like precision-crafted objects with physical weight and crisp tactile snap.
-2. **Zero Administrative Form Syndrome**: Ban administrative dashboard styling, 2000s-era forms, and dense spreadsheet layouts.
+1. **Physical Weight & Tactile Snap**: UI elements (Title Deed cards, buttons, control trays, modals) are not flat 2D planes. They must feel like precision-crafted physical objects with weight, bevels, and crisp mechanical travel.
+2. **Zero Administrative Form Syndrome**: Ban administrative dashboard styling, 2000s-era forms, dense spreadsheet tables, and gray-card-in-gray-card nesting.
 3. **Progressive Disclosure**: Detailed technical guidelines are indexed in reference documents:
    - Motion & Easing: [`reference/motion_budget.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/motion_budget.md)
    - Multi-layer Shadows & Buttons: [`reference/tactile_shadows.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/tactile_shadows.md)
@@ -46,7 +46,7 @@ The **Impeccable** standard ensures 2D UI matches commercial game quality, synch
 ### 2. `/impeccable audit` - Source & Layout Quality Gate
 - **Objective**: Scan code and layout structure to detect anti-patterns before release.
 - **Steps**:
-  1. Run internal UI linter: `npm run lint:ui`.
+  1. Run mechanical UI linter: `npm run lint:ui`.
   2. Verify zero occurrences of forbidden anti-patterns:
      - `border-accent-on-rounded`: Directional border on rounded elements causing corner distortion.
      - `bounce-easing`: Rubber-band overshoot > 1.0.
@@ -56,8 +56,8 @@ The **Impeccable** standard ensures 2D UI matches commercial game quality, synch
      - `first-viewport-column-overflow`: Column height pushing action footers below viewport fold.
      - `cramped-padding` & `text-overflow`: Truncation failure or padding < 8px on narrow screens.
      - `nested-cards`: Excessive card-in-card containers creating visual mud.
-     - `unlayered-css-reset`: CSS reset outside `@layer base` overriding `@layer utilities`.
-     - `corner-clearance-violation`: Inner element spacing to rounded corner less than radius $R$.
+     - `side-tab`: Thick directional border on one card edge (AI tell).
+     - `clipped-overflow-container`: `overflow-hidden` clipping interactive popovers/tooltips.
   3. Verify accessibility: Tap targets $\ge 44 \times 44\text{px}$ (`min-h-[44px] min-w-[44px]`), visible focus ring (`focus-visible:ring-2`), and responsive support from `@360px` to `@1440px`.
 
 ### 3. `/impeccable polish` - Tactile Luxury Refinement
@@ -80,7 +80,7 @@ The **Impeccable** standard ensures 2D UI matches commercial game quality, synch
 
 ---
 
-## 4. ANTI-PATTERNS & REMEDIATION REFERENCE
+## 4. 10 ANTI-PATTERNS & REMEDIATION REFERENCE
 
 | Anti-Pattern | Manifestation | Why Forbidden | Standard Remediation |
 | :--- | :--- | :--- | :--- |
@@ -92,39 +92,40 @@ The **Impeccable** standard ensures 2D UI matches commercial game quality, synch
 | **`first-viewport-column-overflow`** | Unscrolled tall column pushing actions below fold | Breaks player reaction loop on vertical displays | Sticky action footer at container root, scrollable data body |
 | **`cramped-padding`** | Text touching card borders (`p-0.5`) or overflow without `truncate` | Visual clutter, clipped text on 360px displays | Minimum `px-2` to `px-3`, enforce `truncate` with `min-w-0` in flex blocks |
 | **`nested-cards`** | Gray card inside gray card (`bg-slate-100` inside `bg-slate-50`) | Visual mud, dilutes emphasis of 3D board | Flatten hierarchy with whitespace, subtle dividers, or high-contrast backdrops |
-| **`physical-horizontal-overflow`** | $\ge 4$ buttons packed into 1 horizontal row exceeding 296px | Overflows boundary or crushes touch targets | Calculate $W_{\text{net}} \le 296\text{px}$, split into 2 ergonomic tiers |
-| **`dummy-attribute-test-bypass`** | Injecting `data-legacy-style` to satisfy obsolete test assertions | Hides regressions, creates accidental passes | Reconcile outdated test assertions per Specification Evolution |
+| **`side-tab`** | `border-l-4 border-blue-500` on card container | Unbalanced aesthetic, stereotypical AI-generated UI tell | Use subtle accent chip, soft pill badge, or layered box-shadow |
+| **`clipped-overflow-container`** | `overflow-hidden` container clipping popover/tooltip | Breaks interactive dropdowns, tooltips, or negative margin bevels | Use `overflow-visible` or portal overlays outside clip boundary |
 
 ---
 
-## 5. 24 IMPECCABLE ENGINE COMMANDS TABLE
+## 5. THE 6 CORE DESIGN VERBS (COGNITIVE HEURISTICS)
 
-| Command | Category | Description | Reference |
-| :--- | :--- | :--- | :--- |
-| `craft [feature]` | Build | Alias for full visual world creation | [`reference/craft.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/craft.md) |
-| `shape [feature]` | Build | UX/UI planning prior to code implementation | [`reference/shape.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/shape.md) |
-| `init` | Build | Persist durable product context into PRODUCT.md | [`reference/init.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/init.md) |
-| `document` | Build | Extract DESIGN.md from existing codebase | [`reference/document.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/document.md) |
-| `extract [target]` | Build | Extract reusable design tokens and components | [`reference/extract.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/extract.md) |
-| `critique [target]` | Evaluate | Evaluate UX design with heuristic scoring | [`reference/critique.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/critique.md) |
-| `audit [target]` | Evaluate | Verify technical quality (a11y, perf, responsive) | [`reference/audit.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/audit.md) · native: [`reference/audit.native.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/audit.native.md) |
-| `polish [target]` | Refine | Refine tactile finish prior to delivery | [`reference/polish.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/polish.md) |
-| `bolder [target]` | Refine | Inject character into timid, safe designs | [`reference/bolder.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/bolder.md) |
-| `quieter [target]` | Refine | Moderate noisy, visually overwhelming layouts | [`reference/quieter.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/quieter.md) |
-| `distill [target]` | Refine | Strip design to core essence; purge fluff | [`reference/distill.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/distill.md) |
-| `harden [target]` | Refine | Production standardization: error states, i18n, boundaries | [`reference/harden.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/harden.md) |
-| `onboard [target]` | Refine | Design first-run onboarding, empty states, triggers | [`reference/onboard.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/onboard.md) |
-| `animate [target]` | Enhance | Add purposeful motion, timing, and rhythm | [`reference/animate.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/animate.md) |
-| `colorize [target]` | Enhance | Apply strategic color hierarchy to bland UI | [`reference/colorize.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/colorize.md) |
-| `typeset [target]` | Enhance | Perfect typography hierarchy, sizing, and contrast | [`reference/typeset.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/typeset.md) |
-| `layout [target]` | Enhance | Calibrate whitespace, alignment, and cadence | [`reference/layout.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/layout.md) |
-| `delight [target]` | Enhance | Add micro-delight and emotional touchpoints | [`reference/delight.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/delight.md) |
-| `overdrive [target]` | Enhance | Push beyond conventional constraints | [`reference/overdrive.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/overdrive.md) |
-| `clarify [target]` | Fix | Clarify microcopy, labels, and error guidance | [`reference/clarify.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/clarify.md) |
-| `adapt [target]` | Fix | Adapt across device sizes and viewports | [`reference/adapt.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/adapt.md) · native: [`reference/adapt.native.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/adapt.native.md) |
-| `optimize [target]` | Fix | Profile and optimize 2D rendering efficiency | [`reference/optimize.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/optimize.md) |
-| `live` | Iterate | Live browser inspection: pick elements, generate variants | [`reference/live.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/live.md) |
-| `generate [spec]` | Iterate | Agent-driven live variant generation without manual picking | [`reference/generate.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/generate.md) |
+Instead of maintaining brittle 24-command binary tooling, invoke these 6 high-leverage cognitive verbs during UI design and review:
+
+1. **`distill`**: Strip clutter to the core essence. Purge redundant borders, reduce container nesting, collapse nested cards into clean whitespace, and remove decorative elements that do not serve gameplay comprehension.
+2. **`bolder`**: Inject character and confidence into timid designs. Amplify typographic weight, increase contrast between primary CTAs and secondary links, and apply tactile drop shadows with definite mechanical depth.
+3. **`quieter`**: Tame visual noise and chaotic layouts. Tone down excessive background saturation, soften secondary text labels, and collapse secondary metrics into glanceable inline formulas.
+4. **`harden`**: Bulletproof layout against edge cases. Test at extreme viewport widths (`@360px` to `@1440px`), enforce $\ge 44\times 44\text{px}$ touch targets, add overflow truncation guards (`min-w-0 truncate`), and handle long i18n text strings.
+5. **`typeset`**: Perfect typography hierarchy. Enforce font size floor ($\ge 11\text{px}$), balance line heights, tighten tracking on uppercase headers (`tracking-wider text-xs font-bold`), and eliminate unreadable gradient text clips.
+6. **`delight`**: Infuse tactile micro-interactions. Add mechanical button press physics (`active:translate-y-[2px] active:shadow-none`), smooth luxury easing curves, and subtle audio/haptic cues on user interaction.
+
+---
+
+## 6. REFERENCE DIRECTORY INDEX
+
+When implementing or refining UI, reference these detailed guides:
+- **Motion Budget & Easing**: [`reference/motion_budget.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/motion_budget.md)
+- **Multi-layer Tactile Shadows**: [`reference/tactile_shadows.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/tactile_shadows.md)
+- **Craft Floor & Invariants**: [`reference/craft-floor.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/craft-floor.md)
+- **Surface Modes & Decomposition**: [`reference/mode-operate.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/mode-operate.md), [`reference/region-map.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/region-map.md)
+- **Plan & Asset Review**: [`reference/component-review.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/.agents/skills/impeccable/reference/component-review.md)
+- **Overall Design System**: [`docs/domain/design.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/domain/design.md) or [`DESIGN.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/DESIGN.md)
+
+---
+
+## 7. HUD DESIGN INVARIANT: GLANCEABLE HUD VS DASHBOARD TRAP
+
+- **Dashboard Trap Prohibited**: In fast-paced games (15-30s turns), players cannot stop to scroll or swipe notifications. Never collapse notifications into flat generic icons or bury them in drawer menus.
+- **Glanceable HUD Principle**: Do not hide information; condense it into peripheral math formulas and compact metrics (`🔥 Land: Rent x2.5`, `🚂 4 Stations: Fee x2`). Maintain fixed strip height $\le 44\text{px}$, allowing players to absorb total game state in 0.5s with **zero clicks, zero swipes**.
 
 ---
 
