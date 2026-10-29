@@ -100,3 +100,11 @@
 25. **Tactile Corner Arc & Margin Symmetry Standard**:
     - **Corner Arc Buffer ($\text{Clearance} \ge R + 4\text{px}$)**: Container with corner radius $R$ requires internal children to maintain clearance to outer edge $\ge R + 4\text{px}$ (e.g. for `rounded-2xl` $R=16\text{px}$, minimum clearance is $\ge 20\text{px}$).
     - **Margin Symmetry**: Horizontal control bars MUST balance left and right margins: $|\text{margin}_{left} - \text{margin}_{right}| \le 8\text{px}$ on Desktop.
+
+26. **Device Sniffing Dependency Injection Invariant**:
+    - Leaf or deep UI child components are FORBIDDEN from directly importing and executing global device sniffers (`isMobileHardware`, `isPhoneHardware`, `isIOSPhone`) inside rendering loops or nested subtrees. Platform capabilities and hardware tiers MUST be injected deterministically via top-level Component Props or a centralized Context/store selector. Contract and unit test suites MUST verify mobile vs desktop variants purely via prop/context configuration without monkey-patching globals or using `vi.spyOn` on device detection modules.
+
+27. **React Component State Modeling Invariant (Pit of Success & Anti-Boolean Soup)**:
+    - **`useState` Boundary**: Allowed exclusively for single, isolated, atomic values (e.g. single text input string, simple local accordion open/close boolean).
+    - **`useReducer` / Discriminated Union Mandate**: When a component coordinates $\ge 2$ interdependent variables or manages an asynchronous lifecycle (loading, error, success, editing, submitting, multi-step wizards), managing state via independent `useState` booleans ("boolean soup") is STRICTLY FORBIDDEN.
+    - Components MUST model state as a Discriminated/Tagged Union (`type State = { status: 'idle' } | { status: 'loading' } | { status: 'success'; data: T } | { status: 'error'; error: string }`) and drive transitions via a pure reducer function (`useReducer` or dedicated UI store). This makes illegal states unrepresentable, eliminates UI desync, and enables zero-DOM instant contract testing of pure reducer logic.

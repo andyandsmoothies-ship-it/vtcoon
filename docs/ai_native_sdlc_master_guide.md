@@ -25,6 +25,7 @@
    - [6.4 Quy Chuẩn Test Nguyên Tử & Ma Trận 4 Khía Cạnh Hành Vi Đa Năng Cho Mọi Dự Án](#64-quy-chuẩn-test-nguyên-tử--ma-trận-4-khía-cạnh-hành-vi-đa-năng-cho-mọi-dự-án)
    - [6.5 Ma Trận Sẵn Sàng Xuất Xưởng Theo Hình Thái Dự Án (Archetype-Based Production Ship Readiness Matrix)](#65-ma-trận-sẵn-sàng-xuất-xưởng-theo-hình-thái-dự-án-archetype-based-production-ship-readiness-matrix)
    - [6.6 Diệt 3 Anti-Patterns Test Của AI & Kiểm Thử Observable Behavior](#66-diệt-3-anti-patterns-test-của-ai-mock-echoes-change-detectors-static-checklists--observable-behavior)
+   - [6.7 Chỉ Mục Liên Kết 25 Nguyên Tắc Cốt Lõi (The 25 Core Principles SSOT & Cross-Reference Index)](#67-chỉ-mục-liên-kết-25-nguyên-tắc-cốt-lõi-the-25-core-principles-ssot--cross-reference-index)
 7. [GIAI ĐOẠN 1: Khởi Tạo Dự Án & Cài Đặt Cấp Project (Setup 1 Lần)](#giai-đoạn-1-khởi-tạo-dự-án--cài-đặt-cấp-project-setup-1-lần)
    - [1.0.0 Kiến Trúc Phân Tầng 2 Cấp Luật: Global Rule (`~/.gemini/gemini.md`) vs Project Rule (`./GEMINI.md`)](#100-kiến-trúc-phân-tầng-2-cấp-luật-global-rule-geminigeminimd-vs-project-rule-geminimd)
    - [1.0.1 Quy Tắc Bản Địa Hóa Công Cụ Native AG 2.0 & Tiêu Chuẩn Kỹ Năng (Toolchain Mapping, reference/, PRODUCT.md)](#101-quy-tắc-bản-địa-hóa-công-cụ-sang-native-ag-20--tiêu-chuẩn-kỹ-năng-toolchain-mapping)
@@ -508,12 +509,65 @@
 │         đã render từng dòng để đối chiếu 1:1 với thực tế đĩa cứng.
 │       • Đảm bảo 0 tiêu đề rỗng dạng lửng lơ, số liệu SLOC/test count khớp chuẩn xác từng chữ số, và bảng biểu phản ánh đúng thay đổi vật lý.
 │
-└── 46. TRUY VẾT NGUYÊN TẮC HOẠT ĐỘNG (ACTIVE PRINCIPLE TRACEABILITY INVARIANT - PRINCIPLES APPLIED):
-        • Mọi Plan, Adversarial Challenge, QA Handoff và Implementation Handoff BẮT BUỘC phải có danh mục `Principles Applied`
-          (`[Tên Nguyên Tắc] -> [Quyết Định Thay Đổi Cụ Thể]`) chọn lọc từ Core Principles Index:
-          (1) View-Model Seam Extraction, (2) Equivalence-Partition Testing, (3) Relational Multi-Point Assertion,
-          (4) Ephemeral TTL / Dead Man's Switch, (5) 100% DTO & Call-Site Wiring, (6) Poka-Yoke Domain Affordance,
-          (7) Spatial AABB / Non-Occlusion, (8) Resource Disposal & Cache Hygiene, (9) Platform DI Isolation.
+├── 46. TRUY VẾT NGUYÊN TẮC HOẠT ĐỘNG (ACTIVE PRINCIPLE TRACEABILITY INVARIANT - PRINCIPLES APPLIED):
+│       • Mọi Plan, Adversarial Challenge, QA Handoff và Implementation Handoff BẮT BUỘC phải có danh mục `Principles Applied`
+│         (`[Tên Nguyên Tắc] -> [Quyết Định Thay Đổi Cụ Thể]`) chọn lọc từ Core Principles Index trong [`docs/PRINCIPLES.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/PRINCIPLES.md):
+│         (1) View-Model Seam Extraction, (2) Equivalence-Partition Testing, (3) Relational Multi-Point Assertion,
+│         (4) Ephemeral TTL / Dead Man's Switch, (5) 100% DTO & Call-Site Wiring, (6) Poka-Yoke Domain Affordance,
+│         (7) Spatial AABB / Non-Occlusion, (8) Resource Disposal & Cache Hygiene, (9) Platform DI Isolation,
+│         (10) Dropped Requirements & Anti-Phantom Complexity (Sean Goedecke Invariant),
+│         (11) Sequential Multi-Finding Remediation, (12) STRIDE Trust Boundary Defense,
+│         (13) SpecGuard Oracle & Anti-Overfitting Protocol, (14) Build the Lever,
+│         (15) Exploratory Rollback Discipline, (16) Chesterton's Fence (Why Before What),
+│         (17) Make Illegal States Unrepresentable, (18) Conservation & Algebraic Invariant Testing,
+│         (19) Legible State Fixtures (Expect Testing), (20) Requirement Tri-Partitioning (Thoughtworks Rule),
+│         (21) Teardown & Cleanup Integrity, (22) Bounded CLI Watchdog,
+│         (23) Finding Fingerprint & Batching (Paul Bakaus Invariant), (24) Downstream Blast Radius Mapping,
+│         (25) CRAP Score Risk Coupling (Uncle Bob Invariant).
+│
+├── 47. TAM PHÂN YÊU CẦU ĐẶC TẢ & CHỐNG KHOẢNG TRỐNG TỰ TIN (REQUIREMENT TRI-PARTITIONING & ANTI-CONFIDENT GAPS - THOUGHTWORKS RULE):
+│       • Tại Trạm 0.1, trước khi lập Plan, Agent BẮT BUỘC tam phân bối cảnh thành 3 thùng:
+│         (1) Confirmed (đã kiểm chứng với người dùng/SSOT), (2) Assumed (giả thiết kỹ thuật tạm thời), (3) Unknown (quyết định nghiệp vụ chưa có).
+│       • Tuyệt đối CẤM Agent tự bịa logic nghiệp vụ để lấp đầy "khoảng trống tự tin" (confident gaps).
+│         Các Unknowns bắt buộc phải được nêu ra và làm rõ với người dùng qua công cụ `ask_question`.
+│
+├── 48. TOÀN VẸN DỌN DẸP TÀI NGUYÊN & MÃ LỖI THOÁT 3 (TEARDOWN & CLEANUP INTEGRITY INVARIANT - EXIT 3):
+│       • Bộ chạy test (Vitest/Jest) và toolchain runner BẮT BUỘC phải thất bại rõ ràng (Exit 3 / Teardown Error) nếu các hooks dọn dẹp
+│         (`afterEach`, `afterAll`, `dispose`) gặp lỗi hoặc còn tài nguyên treo (socket chưa đóng, child process zombie, stream chưa giải tỏa).
+│       • Tuyệt đối CẤM nuốt lỗi trong khối `try/catch` dọn dẹp để biến sự cố rò rỉ tài nguyên thành ca test pass giả tạo (Exit 0).
+│
+├── 49. GIÁM SÁT THỜI GIAN CHẠY CLI CÓ GIỚI HẠN & GIẢI TỎA TIMER (BOUNDED CLI WATCHDOG & PROCESS GROUP TERMINATION):
+│       • Các CLI runner, sentinel runner và scripts kiểm thử BẮT BUỘC phải unref secondary timers (`timer.unref()`) và áp đặt thời gian ân hạn thoát (<= 3s).
+│       • Nếu các socket hoặc tiến trình con bị treo quá thời gian ân hạn, watchdog BẮT BUỘC cưỡng chế hủy diệt toàn bộ nhóm tiến trình (`process group termination`),
+│         ngăn chặn triệt để nguy cơ treo đứng phiên làm việc của AI Agent.
+│
+├── 50. DẤU VÂN TAY KHUYẾT TẬT & GOM NHÓM LỖI LẶP LẠI (FINDING FINGERPRINT & BATCHING INVARIANT - PAUL BAKAUS RULE):
+│       • Bộ linter, cổng kiểm toán AST và test reporters BẮT BUỘC phải tạo dấu vân tay (fingerprint) cho khuyết tật dựa trên đoạn mã vi phạm (snippet hash)
+│         và mã luật (rule ID) thay vì số dòng vật lý không ổn định, tránh báo động giả khi diff dịch chuyển.
+│       • Các vi phạm lặp đi lặp lại cùng một quy tắc BẮT BUỘC phải gom nhóm (batching) thành 1 dòng chính kèm hậu tố `(and N more)`,
+│         triệt tiêu hoàn toàn nguy cơ làm tràn ngập ngữ cảnh (context saturation).
+│
+├── 51. LẬP BẢN ĐỒ VÙNG ẢNH HƯỞNG HẠ NGUỒN (DOWNSTREAM BLAST RADIUS MAPPING - UIGRAPH LENS):
+│       • Tại Trạm 0 (Root-Cause & Surface Area Gate), Agent BẮT BUỘC phải lập bản đồ không chỉ các file gọi trực tiếp,
+│         mà là toàn bộ chuỗi tác động lan tỏa hạ nguồn: Nguồn Đột Biến -> State/Schema -> Network/Delta -> Consumers/UI.
+│       • Mọi điểm giao diện bị ảnh hưởng hạ nguồn đều phải được lập hợp đồng kiểm thử sống (living tests) bảo vệ trước khi bắt tay viết code.
+│
+├── 52. BẤT BIẾN TRIỆT TIÊU TRẠNG THÁI BẤT HỢP PHÁP TRONG STATE UI (MAKE ILLEGAL STATES UNREPRESENTABLE & DISCRIMINATED UNIONS - POCOCK & KHOURSHID RULE):
+│       • Tuyệt đối CẤM mô hình hóa vòng đời bất đồng bộ hoặc trạng thái giao diện phức tạp bằng tập hợp các cờ boolean độc lập ("boolean soup").
+│       • Mọi state máy trạng thái (FSM) và chu trình UI nhiều bước BẮT BUỘC sử dụng Discriminated/Tagged Unions (`{ status: 'idle' } | { status: 'loading' } | ...`)
+│         kết hợp với `useReducer` hoặc state machine store, loại bỏ hoàn toàn các tổ hợp trạng thái xung đột/bất khả dĩ ngay tại thời điểm biên dịch (0-token compiler feedback).
+│
+└── 53. KHÓA RỦI RO CRAP SCORE & CƠ CHẾ SẤY TRÙNG LẶP AST (CRAP SCORE RISK COUPLING & STRUCTURAL DRYER - UNCLE BOB INVARIANT):
+        • Mọi hàm/phương thức BẮT BUỘC duy trì chỉ số rủi ro CRAP (Change Risk Anti-Patterns) <= 10:
+          CRAP = C^2 * (1 - cov)^3 + C (với C là Cyclomatic Complexity, cov là tỷ lệ bao phủ test).
+        • Hàm có độ phức tạp cao (C >= 5) BẮT BUỘC phải có test bao phủ dày đặc (>= 80%). Các hàm có C >= 11
+          bị cấm tuyệt đối bất kể độ bao phủ test và bắt buộc phải bóc tách thành các hàm con đơn nhiệm.
+        • Cơ chế sấy trùng lặp AST (Dryer rule): Cấm sao chép-dán khối mã nguồn có độ tương đồng cấu trúc >= 0.8;
+          ép buộc gom nhóm abstraction (DRY) ở Trạm 3.
+        • Quy trình thi công tuân thủ triệt để Mô hình 3 Thì của Uncle Bob:
+          (1) Make it Work (Trạm 2 RED -> Trạm 2.5 GREEN: làm chạy trước, mô hình hóa domain, cấm trừu tượng hóa sớm),
+          (2) Make it Right (Trạm 3 & 3.5: qua cổng cơ học CRAP <= 10, Duplication < 0.8, Mutation testing diệt mutant),
+          (3) Practice (Trạm 4: giữ context window sạch, commit nhỏ có trật tự, dọn sạch worktree).
 ```
 
 
@@ -1561,6 +1615,54 @@ Khi đọc bất kỳ checklist nào trên mạng hoặc tài liệu của bên 
 - **Assert Tại Điểm Tiêu Thụ Cuối (Consumer-Side Assertion)**:
   - ❌ Sai: `expect(user.discounts).toHaveLength(1)` (Chỉ assert mảng lưu trữ).
   - ✅ Đúng: `expect(order.calculateTotal()).toBe(80000)` (Chứng minh chiết khấu thực sự làm giảm số tiền phải trả).
+
+---
+
+### 6.7 CHỈ MỤC LIÊN KẾT 25 NGUYÊN TẮC CỐT LÕI (THE 25 CORE PRINCIPLES SSOT & CROSS-REFERENCE INDEX)
+
+> 📖 **Tài liệu tham chiếu chuẩn duy nhất (SSOT)**: Xem toàn văn phân tích nguồn gốc, bẫy tử thần bị triệt tiêu, bất biến cơ học và ví dụ Do vs Don't chuẩn xác tại [`docs/PRINCIPLES.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/PRINCIPLES.md).
+
+Nhằm triệt tiêu tình trạng thuật ngữ tản mác, mơ hồ giữa các Trạm SDLC, toàn bộ 25 nguyên tắc kiến trúc và kiểm thử được chuẩn hóa thành một chỉ mục bất biến duy nhất (**Core Principles Index**). Mọi Kế hoạch (Station 1), Phản biện đối kháng (Station 1.5), Bàn giao QA (Station 2) và Triển khai (Station 2.5) BẮT BUỘC phải trích dẫn tường minh các nguyên tắc đã áp dụng tại mục `Principles Applied: [Tên Nguyên Tắc] -> [Quyết Định Thay Đổi Cụ Thể]`.
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│             BẢN ĐỒ 4 TRỤ CỘT BẢO VỆ CỦA 25 NGUYÊN TẮC CỐT LÕI (THE 25 INVARIANTS)      │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ 1. KIẾN TRÚC & ĐƯỜNG MAY PHÂN TÁCH (Architecture & Seam Discipline):                   │
+│    • (1) View-Model Seam Extraction: Tách triệt để toán học & state khỏi UI/3D JSX.    │
+│    • (5) 100% DTO & Call-Site Wiring: Cấm trường DTO/props chết chỉ để phục vụ test.   │
+│    • (9) Platform DI Isolation: Tiêm capability thiết bị từ trên xuống, cấm sniffer lẻ. │
+│    • (16) Chesterton's Fence (Why Before What): Tra cứu lịch sử git trước khi xóa code.│
+│    • (17) Make Illegal States Unrepresentable: Dùng Discriminated Unions & Reducer,   │
+│           triệt tiêu hoàn toàn "boolean soup" gây trạng thái xung đột tại compile-time. │
+│                                                                                        │
+│ 2. KỸ NGHỆ KIỂM THỬ ĐỐI KHÁNG (Testing Integrity & Anti-False-Green):                  │
+│    • (2) Equivalence-Partition Testing: 1 test bao quát 1 phân vùng biên duy nhất.     │
+│    • (3) Relational Multi-Point Assertion: Assert quan hệ đồng biến f(x1) != f(x2).    │
+│    • (13) SpecGuard Oracle & Anti-Overfitting: Oracle độc lập, cấm test soi biến ẩn.  │
+│    • (18) Conservation & Algebraic Invariants: Assert đẳng thức bảo toàn toàn cục.     │
+│    • (19) Legible State Fixtures: Xuất snapshot bảng chữ legible cho luồng phức tạp.   │
+│    • (21) Teardown & Cleanup Integrity: Bắt buộc thoát Exit 3 nếu hook cleanup lỗi.    │
+│    • (25) CRAP Score Risk Coupling: Khóa rủi ro hàm CRAP <= 10 & sấy trùng lặp AST.    │
+│                                                                                        │
+│ 3. KHẢ NĂNG SINH TỒN VẬN HÀNH (Operational Resilience & Fault Tolerance):              │
+│    • (4) Ephemeral TTL / Dead Man's Switch: Khóa gesture/modal tự phục hồi (TTL 3-5s).│
+│    • (7) Spatial AABB / Non-Occlusion: Kiểm tra Frustum camera và va chạm AABB 3D.     │
+│    • (8) Resource Disposal & Cache Hygiene: Thu hồi tài nguyên WebGL/Audio/Timers.     │
+│    • (12) STRIDE Trust Boundary Defense: Rà soát 6 hiểm họa bảo mật tại ranh giới mạng.│
+│    • (22) Bounded CLI Watchdog: Giới hạn thoát <= 3s, unref timer, diệt process treo.  │
+│                                                                                        │
+│ 4. QUY TRÌNH, NÉN NGỮ CẢNH & ĐÒN BẨY TỰ ĐỘNG (Process, Ergonomics & Automation):       │
+│    • (6) Poka-Yoke Domain Affordance: UI disabled/giá lấy trực tiếp từ Domain logic.   │
+│    • (10) Dropped Requirements (Sean Goedecke): Tuyên bố rõ phạm vi chủ động bỏ qua.   │
+│    • (11) Sequential Multi-Finding Remediation: Vá từng lỗi tuần tự, cấm shotgun edit. │
+│    • (14) Build the Lever: Viết script/codemod tự động hóa khi refactor >= 5 files.    │
+│    • (15) Exploratory Rollback Discipline: Rollback sạch git khi giả thiết thử nghiệm sai.│
+│    • (20) Requirement Tri-Partitioning (Thoughtworks): Tam phân Confirmed/Assumed/Unknown.│
+│    • (23) Finding Fingerprint & Batching (Paul Bakaus): Gom nhóm lỗi lặp (and N more). │
+│    • (24) Downstream Blast Radius Mapping (UIGraph): Vẽ trọn vẹn chuỗi ảnh hưởng hạ nguồn.│
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -3668,40 +3770,42 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
                                          │
                                          ▼
 ┌──────────────────────────────────────────────────────────────────────────────────┐
-│ CHẶNG 2: VÒNG LẶP THI CÔNG LÁT CẮT KỸ THUẬT (VERTICAL SLICE EXECUTION LOOP)       │
+│ CHẶNG 2: VÒNG LẶP THI CÔNG LÁT CẮT KỸ THUẬT (VERTICAL SLICE SDLC PIPELINE)       │
 │ (Chuẩn hóa cho: Greenfield từ số 0, Brownfield lớn, và các Slice phức tạp nhiều tầng)│
 │                                                                                  │
-│ 1. CẮT LÁT CẮT (JIT SLICING): issues/[EPIC]-S[NN]-[name].md                     │
-│    • Khóa chặt phạm vi: Slice 1 chỉ MSS, không làm trước Alternative Flows A#.    │
-│    • Thiết lập hợp đồng kiểm thử nghiệm thu (Acceptance Test Contracts).         │
+│ 1. TRẠM 0: TRINH SÁT BỀ MẶT & VÙNG ẢNH HƯỞNG HẠ NGUỒN (PROBE & BLAST RADIUS):   │
+│    • npm run probe:surface -- <target_files> (LOC, callers, module augmentations).│
+│    • Lập bản đồ tác động lan tỏa hạ nguồn: Nguồn -> State -> Network -> UI.       │
 │                                                                                  │
-│ 2. TRINH SÁT BỐI CẢNH (CONTEXT RECONNAISSANCE - SCOUT):                          │
-│    • Nhánh Greenfield (src/ rỗng): Kiểm tra Test Harness (package.json, runner). │
-│    • Nhánh Brownfield (codebase lớn): Phân tích tác động lan tỏa (Impact Graph). │
+│ 2. TRẠM 0.1: KHÁM PHÁ GIẢI PHÁP, TAM PHÂN YÊU CẦU & BỎ RƠI PHỨC TẠP:             │
+│    • Tam phân: Confirmed / Assumed / Unknown (hỏi rõ Unknown qua ask_question).  │
+│    • Tuyên bố Explicitly Dropped Requirements (Sean Goedecke Rule - chống over-eng).│
+│    • STRIDE Threat Check cho luồng mạng / transaction / state mutation.          │
 │                                                                                  │
-│ 3. BẺ NHỎ KẾ HOẠCH & GRILL ZERO-TRUST (writing-plans + plan-griller):            │
-│    • Phân loại cửa: One-Way Door (Bắt buộc plan chi tiết) vs Two-Way Door (Fast).│
-│    • plan-griller đối kháng đĩa cứng, vạch trần 1-3 điểm mù trước khi duyệt.     │
+│ 3. TRẠM 1: LẬP KẾ HOẠCH TINH GỌN (DRAFT LEAN PLAN <= 200 LOC):                   │
+│    • Khóa cứng Invariants, DTO contracts, Two-Stage Decoupling & Principles.     │
 │                                                                                  │
-│ 4. THI CÔNG TDD CẤP HỆ THỐNG (STATION 1 RED ➔ STATION 2 GREEN):                  │
-│    • [Trạm 1: RED]: qa-tester tạo E2E Tests ĐỎ, Inversion Gate khóa ranh giới.  │
-│    • [Trạm 2: GREEN]: implementer tự do thi công One-Sweep toàn hệ thống.        │
-│    • Kế toán kép (Double-entry bookkeeping): Test assertion bất biến, cấm sửa test.│
+│ 4. TRẠM 1.2 & 1.5: KIỂM TOÁN KẾ HOẠCH & ĐỐI KHÁNG MÙ TRONG CÙNG LƯỢT:            │
+│    • node scripts/audit_plan.mjs <plan> --auto-sign (quét surface & callers).    │
+│    • Blind Adversarial Challenge (adversarial-challenger -> PLAN_CHALLENGE).     │
 │                                                                                  │
-│ 5. QUÉT SẠCH 5 KHUYẾT TẬT ĐĨA VẬT LÝ (STATION 2.5: SWEEPING SCOUT AUDIT):       │
-│    • scout quét 100% file đã sửa: Stale closures, Unhandled async, Leaks, Dirty  │
-│      casts, Dead-end states. Dọn sạch triệt để trước khi chuyển Reviewer.        │
+│ 5. TRẠM 1.8: CỔNG PHÊ DUYỆT CỦA CON NGƯỜI (HUMAN GATE):                          │
+│    • Con người duyệt ("đồng ý" / status: APPROVED). CẤM sửa code khi chưa duyệt. │
 │                                                                                  │
-│ 6. KIỂM TOÁN ĐĨA VẬT LÝ & ACTIVE REMEDIATION (STATION 3: INDEPENDENT REVIEW):    │
-│    • spec-reviewer + code-reviewer kiểm chứng đĩa vật lý (view_file, terminal).  │
-│    • Active Remediation: Reviewer tự áp dụng bản vá cơ học (Fix Over Talk).      │
+│ 6. TRẠM 2 & 2.5: THÌ 1 - LÀM CHO CHẠY (MAKE IT WORK - TDD RED ➔ GREEN):            │
+│    • [Trạm 2: RED]: qa-tester tạo atomic tests theo Equivalence Partitions         │
+│      (100% exported symbols, Semantic Behavioral RED, cấm mock code lõi).           │
+│    • [Trạm 2.5: GREEN]: implementer chỉ viết code tối thiểu để chuyển test sang GREEN.│
 │                                                                                  │
-│ 7. MIỄN DỊCH PHẢN HỒI HỒI CỨU (STATION 3.5: RETRO FEEDBACK INOCULATION):         │
-│    • Mọi góp ý/sửa lỗi biến thành test tự động, linter AST, hoặc gotchas 3 tầng.│
+│ 7. TRẠM 3 & 3.5: THÌ 2 - LÀM CHO ĐÚNG (MAKE IT RIGHT - HARD QUALITY GATES):      │
+│    • [Trạm 3]: npm run prefilter, check_scope, khóa CRAP <= 10 & sấy trùng lặp AST.│
+│    • [Trạm 3.5]: npm run sentinel (đột biến AST khóa độc quyền) + visual-critic  │
+│      + Impeccable Lite (npm run lint:ui - 0 anti-patterns, gom nhóm lỗi lặp).    │
 │                                                                                  │
-│ 8. NGHIỆM THU THỰC TẾ, GÕ GIT COMMIT & HANDOFF CHUYỂN PHIÊN:                     │
-│    • Smoke test 30s ➔ Con người TỰ TAY gõ git commit ➔ Đánh dấu [x] vào Sổ Cái. │
-│    • Gõ /handoff dọn sạch ngữ cảnh (Token về 0) trước khi sang Slice tiếp theo.   │
+│ 8. TRẠM 4: THÌ 3 - THỰC HÀNH KỶ LUẬT (PRACTICE - DELIVERY & WORKTREE CLEANUP):    │
+│    • npm run report -- [ID], node scripts/check_evidence.mjs <ticket>.          │
+│    • Main Agent tự đọc 1:1 file báo cáo trước khi trình bày cho người dùng.     │
+│    • Dọn sạch worktree, nén context ➔ Con người TỰ TAY gõ git commit.           │
 └────────────────────────────────────────┬─────────────────────────────────────────┘
                                          │
                                          ▼

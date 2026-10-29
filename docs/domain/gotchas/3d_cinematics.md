@@ -117,3 +117,6 @@
 29. **Overview Camera Bottom-Dock Clearance & Contact Occlusion**:
     - **Cell 0 GO Clearance**: On desktop overview (1280x800), to prevent fixed bottom action docks (`fixed bottom-4`, height $\sim 64\text{px}$) from occluding the South tile label (Cell 0 Khởi Hành at $[+7.0, 0, +7.0]$), camera look-at center target requires a forward bias ($Z_{\text{target}} \ge +0.3\text{m}$) or pitch angle $\ge 40.0^\circ$ (baseline $38.6^\circ$).
 
+30. **Standardized R3F Test Seam & Fixture Invariant**:
+    - FORBIDDEN creating bespoke local mocks of `@react-three/fiber` or Three.js frame loops across test files. All R3F lifecycle, `useFrame`, and WebGL context simulation MUST use the centralized test seam `tests/helpers/r3f_test_harness.ts`. Pure 3D math and view-model transforms must be tested in isolation without headless WebGL initialization.
+

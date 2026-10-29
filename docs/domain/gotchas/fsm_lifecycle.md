@@ -63,3 +63,6 @@
 
 18. **Active Self-Healing & Ephemeral State TTL**:
     - Ephemeral state flags, touch collections, and subsystem locks MUST implement an authoritative Dead Man's Switch (TTL 3s–5s) with deterministic recovery actions.
+
+19. **i18n Rejection Reason Parity Invariant**:
+    - Every domain `ActionRejectReason` code MUST map 100% in `src/domain/i18n/vi.ts` typed `Record<ActionRejectReason, string>`, mechanically enforced via `npm run prefilter` (`scripts/check_reason_i18n_parity.mjs`).
