@@ -25,11 +25,12 @@
    - [6.4 Quy Chuẩn Test Nguyên Tử & Ma Trận 4 Khía Cạnh Hành Vi Đa Năng Cho Mọi Dự Án](#64-quy-chuẩn-test-nguyên-tử--ma-trận-4-khía-cạnh-hành-vi-đa-năng-cho-mọi-dự-án)
    - [6.5 Ma Trận Sẵn Sàng Xuất Xưởng Theo Hình Thái Dự Án (Archetype-Based Production Ship Readiness Matrix)](#65-ma-trận-sẵn-sàng-xuất-xưởng-theo-hình-thái-dự-án-archetype-based-production-ship-readiness-matrix)
    - [6.6 Diệt 3 Anti-Patterns Test Của AI & Kiểm Thử Observable Behavior](#66-diệt-3-anti-patterns-test-của-ai-mock-echoes-change-detectors-static-checklists--observable-behavior)
-   - [6.7 Chỉ Mục Liên Kết 25 Nguyên Tắc Cốt Lõi (The 25 Core Principles SSOT & Cross-Reference Index)](#67-chỉ-mục-liên-kết-25-nguyên-tắc-cốt-lõi-the-25-core-principles-ssot--cross-reference-index)
+   - [6.7 Chỉ Mục Liên Kết 30 Nguyên Tắc Cốt Lõi (The 30 Core Principles SSOT & Cross-Reference Index)](#67-chỉ-mục-liên-kết-30-nguyên-tắc-cốt-lõi-the-30-core-principles-ssot--cross-reference-index)
 7. [GIAI ĐOẠN 1: Khởi Tạo Dự Án & Cài Đặt Cấp Project (Setup 1 Lần)](#giai-đoạn-1-khởi-tạo-dự-án--cài-đặt-cấp-project-setup-1-lần)
    - [1.0.0 Kiến Trúc Phân Tầng 2 Cấp Luật: Global Rule (`~/.gemini/gemini.md`) vs Project Rule (`./GEMINI.md`)](#100-kiến-trúc-phân-tầng-2-cấp-luật-global-rule-geminigeminimd-vs-project-rule-geminimd)
    - [1.0.1 Quy Tắc Bản Địa Hóa Công Cụ Native AG 2.0 & Tiêu Chuẩn Kỹ Năng (Toolchain Mapping, reference/, PRODUCT.md)](#101-quy-tắc-bản-địa-hóa-công-cụ-sang-native-ag-20--tiêu-chuẩn-kỹ-năng-toolchain-mapping)
 8. [GIAI ĐOẠN 2: Trọn Bộ Subagents Chuyên Trách Native AG 2.0 Sẵn Sàng Sử Dụng](#giai-đoạn-2-trọn-bộ-subagents-chuyên-trách-native-ag-20-sẵn-sàng-sử-dụng)
+   - [2.0.1 Mô Hình Nhận Thức Voi & Cá Vàng (The Elephant-Goldfish Dual-Context Paradigm)](#201-mô-hình-nhận-thức-voi--cá-vàng-the-elephant-goldfish-dual-context-paradigm---google-egm)
    - [8.1 Bộ 9 Subagents Cốt Lõi Kỹ Thuật & Kiến Trúc (scout, plan-griller, adversarial-challenger, forensic-challenger, qa-tester, implementer, spec-reviewer, re-reviewer, code-reviewer, chaos-sentinel)](#1-file-agentsagentsscoutmd-trinh-sát---định-vị-tọa-độ--nạp-skill-jit)
    - [8.2 Bộ 5 Subagents Thẩm Mỹ, Đồ Họa & Thủ Công (ui-craft-reviewer, game-3d-visual-critic, asset-producer, documenter, manual-edit)](#5-file-agentsagentsui-craft-reviewermd-chuyên-gia-thẩm-định-thủ-công-2d-uiux)
 9. [KỊCH BẢN THỰC CHIẾN: Greenfield, Feature Slices, Bug/CR (Sign-off Test) & Brownfield](#9-kịch-bản-thực-chiến-từ-số-0-greenfield-đến-từng-tính-năng-feature)
@@ -523,7 +524,12 @@
 │         (19) Legible State Fixtures (Expect Testing), (20) Requirement Tri-Partitioning (Thoughtworks Rule),
 │         (21) Teardown & Cleanup Integrity, (22) Bounded CLI Watchdog,
 │         (23) Finding Fingerprint & Batching (Paul Bakaus Invariant), (24) Downstream Blast Radius Mapping,
-│         (25) CRAP Score Risk Coupling (Uncle Bob Invariant).
+│         (25) CRAP Score Risk Coupling (Uncle Bob Invariant),
+│         (26) Bulk Telemetry & Scanning Ergonomics (FSDATALAB Rule),
+│         (27) Derived State Over Sync (Declarative UI Invariant),
+│         (28) Performance as Architectural DNA,
+│         (29) Token & Attention Budget Hygiene,
+│         (30) Cognitive Ownership & Silent Decision Disclosure.
 │
 ├── 47. TAM PHÂN YÊU CẦU ĐẶC TẢ & CHỐNG KHOẢNG TRỐNG TỰ TIN (REQUIREMENT TRI-PARTITIONING & ANTI-CONFIDENT GAPS - THOUGHTWORKS RULE):
 │       • Tại Trạm 0.1, trước khi lập Plan, Agent BẮT BUỘC tam phân bối cảnh thành 3 thùng:
@@ -557,17 +563,40 @@
 │       • Mọi state máy trạng thái (FSM) và chu trình UI nhiều bước BẮT BUỘC sử dụng Discriminated/Tagged Unions (`{ status: 'idle' } | { status: 'loading' } | ...`)
 │         kết hợp với `useReducer` hoặc state machine store, loại bỏ hoàn toàn các tổ hợp trạng thái xung đột/bất khả dĩ ngay tại thời điểm biên dịch (0-token compiler feedback).
 │
-└── 53. KHÓA RỦI RO CRAP SCORE & CƠ CHẾ SẤY TRÙNG LẶP AST (CRAP SCORE RISK COUPLING & STRUCTURAL DRYER - UNCLE BOB INVARIANT):
-        • Mọi hàm/phương thức BẮT BUỘC duy trì chỉ số rủi ro CRAP (Change Risk Anti-Patterns) <= 10:
-          CRAP = C^2 * (1 - cov)^3 + C (với C là Cyclomatic Complexity, cov là tỷ lệ bao phủ test).
-        • Hàm có độ phức tạp cao (C >= 5) BẮT BUỘC phải có test bao phủ dày đặc (>= 80%). Các hàm có C >= 11
-          bị cấm tuyệt đối bất kể độ bao phủ test và bắt buộc phải bóc tách thành các hàm con đơn nhiệm.
-        • Cơ chế sấy trùng lặp AST (Dryer rule): Cấm sao chép-dán khối mã nguồn có độ tương đồng cấu trúc >= 0.8;
-          ép buộc gom nhóm abstraction (DRY) ở Trạm 3.
-        • Quy trình thi công tuân thủ triệt để Mô hình 3 Thì của Uncle Bob:
-          (1) Make it Work (Trạm 2 RED -> Trạm 2.5 GREEN: làm chạy trước, mô hình hóa domain, cấm trừu tượng hóa sớm),
-          (2) Make it Right (Trạm 3 & 3.5: qua cổng cơ học CRAP <= 10, Duplication < 0.8, Mutation testing diệt mutant),
-          (3) Practice (Trạm 4: giữ context window sạch, commit nhỏ có trật tự, dọn sạch worktree).
+├── 53. KHÓA RỦI RO CRAP SCORE & CƠ CHẾ SẤY TRÙNG LẶP AST (CRAP SCORE RISK COUPLING & STRUCTURAL DRYER - UNCLE BOB INVARIANT):
+│       • Mọi hàm/phương thức BẮT BUỘC duy trì chỉ số rủi ro CRAP (Change Risk Anti-Patterns) <= 10:
+│         CRAP = C^2 * (1 - cov)^3 + C (với C là Cyclomatic Complexity, cov là tỷ lệ bao phủ test).
+│       • Hàm có độ phức tạp cao (C >= 5) BẮT BUỘC phải có test bao phủ dày đặc (>= 80%). Các hàm có C >= 11
+│         bị cấm tuyệt đối bất kể độ bao phủ test và bắt buộc phải bóc tách thành các hàm con đơn nhiệm.
+│       • Cơ chế sấy trùng lặp AST (Dryer rule): Cấm sao chép-dán khối mã nguồn có độ tương đồng cấu trúc >= 0.8;
+│         ép buộc gom nhóm abstraction (DRY) ở Trạm 3.
+│       • Quy trình thi công tuân thủ triệt để Mô hình 3 Thì của Uncle Bob:
+│         (1) Make it Work (Trạm 2 RED -> Trạm 2.5 GREEN: làm chạy trước, mô hình hóa domain, cấm trừu tượng hóa sớm),
+│         (2) Make it Right (Trạm 3 & 3.5: qua cổng cơ học CRAP <= 10, Duplication < 0.8, Mutation testing diệt mutant),
+│         (3) Practice (Trạm 4: giữ context window sạch, commit nhỏ có trật tự, dọn sạch worktree).
+│
+├── 54. CÔNG THÁI HỌC DỮ LIỆU & VĂN BẢN HÀNG LOẠT (BULK TELEMETRY & SCANNING ERGONOMICS - FSDATALAB RULE):
+│       • Mọi luồng hiển thị danh sách mật độ cao, activity feeds, log formatters và tóm tắt turn của Agent BẮT BUỘC tuân thủ:
+│         (1) Front-Loading & Verb-Leading: Đưa định danh/kết quả quan trọng nhất lên đầu, bỏ chủ ngữ ngầm ("Hệ thống..."), mở đầu bằng động từ hành động;
+│         (2) Lexical Singularity: 1 khái niệm = 1 từ vựng duy nhất xuyên suốt hệ thống (triệt tiêu từ đồng nghĩa nhảy múa);
+│         (3) Structural Invariance: Cùng một trạng thái/kết quả BẮT BUỘC dùng chung một khuôn mẫu câu; biến thiên cấu trúc chỉ dùng để báo hiệu cảnh báo hoặc lỗi.
+│
+├── 55. PHÁI SINH THAY VÌ ĐỒNG BỘ TRẠNG THÁI (DERIVED STATE OVER SYNC & ANTI-EFFECT CHAINS):
+│       • Chỉ lưu trữ trạng thái nguyên thủy tối thiểu; mọi biến thể phụ thuộc và view projections BẮT BUỘC phái sinh trực tiếp tại dòng khai báo (pure selectors, getters, memoized derivations).
+│       • Tuyệt đối CẤM dùng effect/watcher (useEffect, watch, reaction) chỉ để lắng nghe State A rồi gọi setState B, triệt tiêu 100% mạng lưới effect chuyền tay nhau (chained effect spaghetti), bão re-render và lỗi stale closures.
+│
+├── 56. HIỆU NĂNG LÀ GEN KIẾN TRÚC & CHỐNG TỐI ƯU ĐỐI PHÓ (PERFORMANCE AS ARCHITECTURAL DNA & ANTI-COPE OPTIMIZATION):
+│       • Hiệu năng không thể "lắp thêm" sau này ("performance cannot be retrofitted"); mô hình dữ liệu và layout bộ nhớ BẮT BUỘC thiết kế phẳng, liên tục và tuần tự từ Ngày 0.
+│       • Caching và skeleton loader là giải pháp đối phó ("caching is cope") nếu dùng để che đậy query chậm, N+1 hay layout bộ nhớ phân mảnh. Bắt buộc xóa bỏ tầng cache tạm để phơi bày nút thắt vật lý; đo lường bằng profiler thực tế, CẤM tối ưu bằng cảm tính ("Measure with perf, not vibes").
+│
+├── 57. VỆ SINH NGÂN SÁCH TOKEN & CỬA SỔ CHÚ Ý (TOKEN & ATTENTION BUDGET HYGIENE - TOOL PRUNING & DETERMINISTIC HARNESS):
+│       • Cắt tỉa triệt để schema công cụ thừa (Tool Pruning / Lazy MCP) khỏi context từng turn; bảo toàn tối đa cửa sổ chú ý (attention window) cho code diff và logic suy luận sâu.
+│       • Đóng đinh các lệnh kiểm thử và quy ước repo vào Harness tĩnh (GEMINI.md <= 100 LOC) thay vì để agent tự mò mẫm hay phụ thuộc model phụ; chặn đứng vòng lặp kẹt bằng ngân sách thử <= 3 lần và watchdog <= 3s.
+│
+└── 58. SỞ HỮU NHẬN THỨC & MINH BẠCH QUYẾT ĐỊNH NGẦM (COGNITIVE OWNERSHIP & SILENT DECISION DISCLOSURE - ADDY OSMANI RULE):
+        • Triệt tiêu "Hội chứng Đầu hàng Nhận thức" (Cognitive Surrender) và ảo giác "Check Xanh"; mọi Plan (Trạm 1) và Báo cáo Nghiệm thu (Trạm 4) BẮT BUỘC khai báo 2 mục:
+          (1) Silent Decisions & Assumptions Made: Các quyết định/giả định kỹ thuật (defaults, timeout, sort, error handling) mà AI đã tự ý đưa ra thay cho người dùng;
+          (2) What Checks Did NOT Prove: Ranh giới các ca biên mà bộ test chưa chứng minh được (race condition, network partition, unhandled viewport scales).
 ```
 
 
@@ -1618,15 +1647,15 @@ Khi đọc bất kỳ checklist nào trên mạng hoặc tài liệu của bên 
 
 ---
 
-### 6.7 CHỈ MỤC LIÊN KẾT 25 NGUYÊN TẮC CỐT LÕI (THE 25 CORE PRINCIPLES SSOT & CROSS-REFERENCE INDEX)
+### 6.7 CHỈ MỤC LIÊN KẾT 30 NGUYÊN TẮC CỐT LÕI (THE 30 CORE PRINCIPLES SSOT & CROSS-REFERENCE INDEX)
 
 > 📖 **Tài liệu tham chiếu chuẩn duy nhất (SSOT)**: Xem toàn văn phân tích nguồn gốc, bẫy tử thần bị triệt tiêu, bất biến cơ học và ví dụ Do vs Don't chuẩn xác tại [`docs/PRINCIPLES.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/docs/PRINCIPLES.md).
 
-Nhằm triệt tiêu tình trạng thuật ngữ tản mác, mơ hồ giữa các Trạm SDLC, toàn bộ 25 nguyên tắc kiến trúc và kiểm thử được chuẩn hóa thành một chỉ mục bất biến duy nhất (**Core Principles Index**). Mọi Kế hoạch (Station 1), Phản biện đối kháng (Station 1.5), Bàn giao QA (Station 2) và Triển khai (Station 2.5) BẮT BUỘC phải trích dẫn tường minh các nguyên tắc đã áp dụng tại mục `Principles Applied: [Tên Nguyên Tắc] -> [Quyết Định Thay Đổi Cụ Thể]`.
+Nhằm triệt tiêu tình trạng thuật ngữ tản mác, mơ hồ giữa các Trạm SDLC, toàn bộ 30 nguyên tắc kiến trúc và kiểm thử được chuẩn hóa thành một chỉ mục bất biến duy nhất (**Core Principles Index**). Mọi Kế hoạch (Station 1), Phản biện đối kháng (Station 1.5), Bàn giao QA (Station 2) và Triển khai (Station 2.5) BẮT BUỘC phải trích dẫn tường minh các nguyên tắc đã áp dụng tại mục `Principles Applied: [Tên Nguyên Tắc] -> [Quyết Định Thay Đổi Cụ Thể]`.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│             BẢN ĐỒ 4 TRỤ CỘT BẢO VỆ CỦA 25 NGUYÊN TẮC CỐT LÕI (THE 25 INVARIANTS)      │
+│             BẢN ĐỒ 4 TRỤ CỘT BẢO VỆ CỦA 30 NGUYÊN TẮC CỐT LÕI (THE 30 INVARIANTS)      │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ 1. KIẾN TRÚC & ĐƯỜNG MAY PHÂN TÁCH (Architecture & Seam Discipline):                   │
 │    • (1) View-Model Seam Extraction: Tách triệt để toán học & state khỏi UI/3D JSX.    │
@@ -1635,6 +1664,9 @@ Nhằm triệt tiêu tình trạng thuật ngữ tản mác, mơ hồ giữa cá
 │    • (16) Chesterton's Fence (Why Before What): Tra cứu lịch sử git trước khi xóa code.│
 │    • (17) Make Illegal States Unrepresentable: Dùng Discriminated Unions & Reducer,   │
 │           triệt tiêu hoàn toàn "boolean soup" gây trạng thái xung đột tại compile-time. │
+│    • (27) Derived State Over Sync: Phái sinh tại chỗ, cấm effect chuyền tay.           │
+│    • (28) Performance as Architectural DNA: Hiệu năng từ Data Layout Ngày 0;         │
+│           CẤM cache đối phó ("caching is cope"); đo profiler, cấm tối ưu cảm tính.     │
 │                                                                                        │
 │ 2. KỸ NGHỆ KIỂM THỬ ĐỐI KHÁNG (Testing Integrity & Anti-False-Green):                  │
 │    • (2) Equivalence-Partition Testing: 1 test bao quát 1 phân vùng biên duy nhất.     │
@@ -1661,6 +1693,11 @@ Nhằm triệt tiêu tình trạng thuật ngữ tản mác, mơ hồ giữa cá
 │    • (20) Requirement Tri-Partitioning (Thoughtworks): Tam phân Confirmed/Assumed/Unknown.│
 │    • (23) Finding Fingerprint & Batching (Paul Bakaus): Gom nhóm lỗi lặp (and N more). │
 │    • (24) Downstream Blast Radius Mapping (UIGraph): Vẽ trọn vẹn chuỗi ảnh hưởng hạ nguồn.│
+│    • (26) Bulk Telemetry & Scanning Ergonomics: Đưa từ khóa lên đầu, 1 từ 1 nghĩa.     │
+│    • (29) Token & Attention Budget Hygiene: Cắt tỉa tool thừa per-turn (Lazy MCP);    │
+│           harness lệnh tĩnh; ngắt kẹt vòng lặp <= 3 lần.                              │
+│    • (30) Cognitive Ownership & Silent Decision Disclosure: Công khai quyết định ngầm; │
+│           nêu rõ ranh giới bài test chưa chứng minh được (chống Cognitive Surrender).  │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -2552,6 +2589,7 @@ Nếu bạn là Fresher hoặc lần đầu tiếp xúc với các thuật ngữ
 | **Epic Ledger** | **Sổ cái công nhật** | Bảng danh sách công việc (`_epic_ledger.md`) ghi rõ việc nào đã xong `[x]`, việc nào đang làm để đổi phiên chat không bị quên. |
 | **Workspace: "branch"** | **Phòng thí nghiệm cách ly** | Môi trường rẽ nhánh riêng để AI thử nghiệm và chạy test; chỉ khi bài test xanh 100% thì mới đưa mã nguồn vào dự án chính. |
 | **Workspace: "share"** | **Phòng đọc dùng chung** | Cơ chế chia sẻ git worktree an toàn cho các tác nhân chỉ đọc (Reviewer/Auditor); kiểm tra mã nguồn thật trên đĩa mà không tốn dung lượng sao chép và không gây khóa file trên Windows. |
+| **Mô hình Voi & Cá Vàng (Elephant vs Goldfish)** | **Người vẽ tranh & Khách qua đường** | Con Voi (Agent chính) giữ bối cảnh dài hạn để vẽ kế hoạch; Cá Vàng (Subagent rỗng bộ nhớ) là khách qua đường không quen biết, đứng nhìn từ xa và chỉ trích trung thực các vết lem mà người vẽ không thấy. |
 
 ---
 
@@ -2570,6 +2608,36 @@ Mỗi subagent trong thư mục `.agents/agents/<name>.md` được cấu hình 
 > **Nguyên tắc phân định Subagents Ngữ Nghĩa vs Scripts Cơ Học (The Semantic vs Mechanical Division)**:
 > - **Nhóm Subagents Cốt Lõi (Lưu hành trong `.agents/agents/`)**: Chỉ giữ lại các tác tử có năng lực suy luận ngữ nghĩa thực sự: `implementer` (viết code), `code-reviewer` (soi rò rỉ timer/memory, race conditions), `adversarial-challenger` (vặn vẹo lỗ hổng FSM/kinh tế cho Epic lớn), `game-3d-visual-critic` (thẩm định nghệ thuật 3D), `scout` (tra cứu JIT).
 > - **Nhóm Chuyển Giao Cơ Học (Đã lưu trữ vào `.agents/agents_backup/`)**: Các vai trò đếm chữ, so khớp file, hoặc chạy script (`plan-griller`, `spec-reviewer`, `chaos-sentinel`, `ui-craft-reviewer`) đã được chuyển giao 100% cho các script Node.js/Playwright (`audit_plan.mjs`, `check_scope.mjs`, `sentinel_runner.mjs`) để tiết kiệm 90% tokens và triệt tiêu độ trễ.
+
+### 2.0.1 MÔ HÌNH NHẬN THỨC VOI & CÁ VÀNG (THE ELEPHANT-GOLDFISH DUAL-CONTEXT PARADIGM - GOOGLE EGM)
+
+> **Nguồn gốc**: Dave Rensin (VP tại Google, tác giả *Elephants, Goldfish, and the New Golden Age of Software Engineering*).  
+> **Nguyên lý cốt lõi**: *Không bao giờ để tác nhân vừa lập kế hoạch tự tay kiểm toán kế hoạch của chính mình (Anti-Confirmation Bias).*
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│             MÔ HÌNH TÁCH BIỆT NGỮ CẢNH: CON VOI (CHÍNH) vs CÁ VÀNG (PHẢN BIỆN)          │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ 🐘 CON VOI (THE ELEPHANT - DEEP CONTEXT):                                              │
+│ • Là Agent chính (Main Conversation) làm việc tương tác dài hạn cùng người dùng.       │
+│ • Nắm giữ: Tầm nhìn dài hạn, bối cảnh lịch sử, micro-decisions và mục tiêu tổng thể.   │
+│ • Trách nhiệm: Thảo luận, làm rõ bài toán (Trạm 0/0.1) và soạn thảo Kế hoạch (Trạm 1).│
+│ • Bẫy tâm lý: Bị "Thiên kiến xác nhận" (Confirmation Bias), mù trước các lỗ hổng do   │
+│   chính mình tạo ra. TUYỆT ĐỐI CẤM Con Voi tự duyệt bài hoặc tự thi công một mạch.    │
+│                                                                                        │
+│ 🐠 CÁ VÀNG (THE GOLDFISH - ZERO CONTEXT / STATELESS SUBAGENTS):                       │
+│ • Là các Subagent độc lập (`adversarial-challenger`, `forensic-challenger`, `qa-tester`).│
+│ • "Trí nhớ cá vàng": Không mang theo lịch sử chat trước đó, tâm trí khách quan 100%.   │
+│ • Giao thức Đối kháng Mù (Neutral Blind Dispatch Protocol):                            │
+│   Agent chính chỉ nạp bản Plan và chỉ thị đối kháng; CẤM mớm lời khen ngợi hoặc định   │
+│   hướng thiên vị. Cá Vàng tự query đĩa vật lý để vạch trần điểm mù.                    │
+│ • 4 Lăng Kính Soi Kế Hoạch (Google 4-Lens Rubric):                                     │
+│   (1) Zoom Out: Tính năng có thực sự cần thiết hay chỉ là over-engineering?            │
+│   (2) Comprehension: Bản đặc tả có rõ ràng, không có bẫy giả định ngầm?                │
+│   (3) Critic: Có lỗ hổng rò rỉ state, race condition, hoặc Netting collision không?   │
+│   (4) Readiness: Các hợp đồng DTO, Invariants và Living Tests đã đủ để code chưa?     │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 Tạo các file subagents chuyên trách sau trong thư mục `.agents/agents/`:
 
@@ -3787,7 +3855,8 @@ Khi bạn chạy lệnh trong Terminal gặp lỗi đỏ, hoặc Subagent báo t
 │                                                                                  │
 │ 4. TRẠM 1.2 & 1.5: KIỂM TOÁN KẾ HOẠCH & ĐỐI KHÁNG MÙ TRONG CÙNG LƯỢT:            │
 │    • node scripts/audit_plan.mjs <plan> --auto-sign (quét surface & callers).    │
-│    • Blind Adversarial Challenge (adversarial-challenger -> PLAN_CHALLENGE).     │
+│    • Blind Adversarial Challenge: Cá Vàng phản biện qua 4 lăng kính Google EGM   │
+│      (Zoom Out, Comprehension, Critic, Readiness -> PLAN_CHALLENGE).            │
 │                                                                                  │
 │ 5. TRẠM 1.8: CỔNG PHÊ DUYỆT CỦA CON NGƯỜI (HUMAN GATE):                          │
 │    • Con người duyệt ("đồng ý" / status: APPROVED). CẤM sửa code khi chưa duyệt. │

@@ -1,4 +1,4 @@
-# CORE PRINCIPLES SPECIFICATION (THE 25 INVARIANTS)
+# CORE PRINCIPLES SPECIFICATION (THE 30 INVARIANTS)
 
 > **Authority**: Single Source of Truth (SSOT) reference for the Core Principles Index cited in [`GEMINI.md`](file:///c:/Users/HP/Documents/GitHub/vtcoon/GEMINI.md#L57).  
 > **Purpose**: Eliminates ambiguous terminology across Plans, Adversarial Challenges, QA Specifications, and Code Reviews. Every entry in `Principles Applied` MUST link directly to its corresponding invariant below.  
@@ -257,3 +257,67 @@
 - **Do vs Don't**:
   - ❌ *Don't*: Author a 40-line dispatch handler with 5 nested branches ($C = 5$) covered by a single happy-path test ($\text{cov} = 30\% \implies \text{CRAP} = 25 \times 0.343 + 5 = 13.6 > 10$).
   - ✅ *Do*: Refactor into focused sub-handlers ($C \le 3$) or author equivalence partition tests covering $\ge 85\%$ of branches ($\text{cov} = 0.85 \implies \text{CRAP} = 25 \times 0.003 + 5 = 5.1 \le 10$).
+
+---
+
+## 26. Bulk Telemetry & Scanning Ergonomics (Front-Loading & Structural Invariance)
+- **Origin**: Full Stack Data Lab (*Five Principles for Generating Readable AI Text in Bulk*).
+- **Trap Killed**: High-density feeds, activity logs, dashboards, and agent turn summaries saturated with verbose filler openers (*"The system has successfully..."*), random synonyms (*"client"* vs *"customer"* vs *"user"*), and erratic phrasing that triggers severe cognitive fatigue.
+- **Core Invariant**: High-density text streams, activity feeds, telemetry formatters, and turn summaries MUST enforce 3 scanning rules:
+  1. **Front-Loading & Verb-Leading**: Put distinguishing identifiers, targets, or key metrics first; omit implied subjects (lead with concise action verbs).
+  2. **Lexical Singularity**: Exactly 1 canonical domain term per concept across the entire system (0 synonym drifting).
+  3. **Structural Invariance**: Identical status/outcomes MUST use identical templates; syntactic variation is reserved strictly to signal state deviations, warnings, or failures.
+- **Do vs Don't**:
+  - ❌ *Don't*: Feed item: *"The system has deducted 50,000 VND from Player 1's cash balance for the land tax."* Next item: *"Player 2 was fined 20,000 VND by municipal authorities."*
+  - ✅ *Do*: Strict template: `Player 1: -50k VND (land tax)` / `Player 2: -20k VND (penalty)`.
+
+---
+
+## 27. Derived State Over Sync (Anti-Effect Chains)
+- **Origin**: Declarative UI Architecture (React "You Might Not Need an Effect" / Solid 2.0 Streaming Derivations / Functional Reactive Programming).
+- **Trap Killed**: Chaining reactive watchers/effects (`useEffect`, `watch`, `reaction`) that listen to State $A$ solely to call `setState(B)`. This recreates the AngularJS 1.x `$watch` hell—spawning render cascades, stale closures, race conditions, and unsearchable state updates where developers must hunt down setters across the codebase.
+- **Core Invariant**: State MUST be modeled as minimal primitive sources of truth; all dependent variations and UI projections MUST be derived dynamically at declaration (via pure calculations, getters, or memoized selectors). Writing an effect or reactive watcher solely to synchronize State $B$ from State $A$ is strictly FORBIDDEN.
+- **Do vs Don't**:
+  - ❌ *Don't*:
+    ```typescript
+    const [items, setItems] = useState<Item[]>([]);
+    const [filteredItems, setFilteredItems] = useState<Item[]>([]);
+    useEffect(() => { setFilteredItems(items.filter(i => i.active)); }, [items]);
+    ```
+  - ✅ *Do*:
+    ```typescript
+    const [items, setItems] = useState<Item[]>([]);
+    const filteredItems = useMemo(() => items.filter(i => i.active), [items]);
+    ```
+
+---
+
+## 28. Performance as Architectural DNA (Anti-Cope Optimization & Data-First Layout)
+- **Origin**: Systems Programming & Data-Oriented Design (Valentin Shergin, Mike Acton, Gabe).
+- **Trap Killed**: Treating performance as an afterthought to be retrofitted later, using distributed/local caching as a band-aid ("caching is cope") or frontend skeleton loaders to mask fundamentally slow N+1 queries, unindexed lookups, or fragmented pointer-chasing data layouts; optimizing by "vibes" instead of physical profilers.
+- **Core Invariant**: Performance cannot be retrofitted; data models and memory access patterns MUST be designed for contiguous, predictable access from Day 0. Introducing caching or speculative memoization to mask unoptimized algorithms or leaky data layouts is strictly FORBIDDEN—bottlenecks must be profiled with physical tooling (`perf`, profiler, flamegraph) and resolved at the data/query source before any caching layer is evaluated.
+- **Do vs Don't**:
+  - ❌ *Don't*: Wrap a 3000ms unindexed database query in a 10-minute Redis cache or flash a 2-second skeleton loader on a screen that should render in 30ms.
+  - ✅ *Do*: Remove the cache to expose the true physical bottleneck; optimize schema indexes, flatten data structures (contiguous arrays, indices), and measure with real profilers before introducing any caching layer.
+
+---
+
+## 29. Token & Attention Budget Hygiene (Tool Pruning & Deterministic Harness)
+- **Origin**: TokenEconomizer (Microsoft Research + UC Berkeley) & Context Window Ergonomics.
+- **Trap Killed**: Flooding the LLM's attention window with dozens of unused tool schemas every turn ("quiet waste" / tool definition tax), burning tokens on dynamic rediscovery loops for basic repo commands, and entering infinite stuck trial-and-error loops.
+- **Core Invariant**: Tool definitions MUST be scoped or lazy-loaded (`call_mcp_tool`) so unused schemas are pruned from per-turn contexts. Standard repository commands MUST be codified deterministically in static project harnesses (`GEMINI.md` $\le 100$ LOC) rather than dynamically rediscovered. Subagents are bound to a strict remediation budget ($\le 3$ attempts) and bounded CLI watchdog ($\le 3\text{s}$) to prevent thrashing loops.
+- **Do vs Don't**:
+  - ❌ *Don't*: Send 40 heavy MCP tool definitions to an agent performing a pure TypeScript refactor, or let an agent retry the exact same failing command 5 times in a row.
+  - ✅ *Do*: Keep tool schemas pruned to the task scope (e.g. read-only for auditors, lazy MCP for specialized tools); codify canonical test commands in the harness; halt and escalate after 3 failed attempts.
+
+---
+
+## 30. Cognitive Ownership & Silent Decision Disclosure (Anti-Surrender & Unverified Boundary Invariant)
+- **Origin**: Addy Osmani (*Critical Thinking When Agents Do the Work*, Google DX) & Wharton (Cognitive Surrender / Steven Shaw & Gideon Nave).
+- **Trap Killed**: Engineers passively rubber-stamping polished agent outputs ("cognitive surrender") without understanding subtle implicit choices; agents concealing unprompted defaults, edge-case assumptions, and silent design tradeoffs behind green test passes ("the green check fallacy").
+- **Core Invariant**: Every Plan (Station 1) and Final Verification Report (Station 4) MUST explicitly disclose two mandatory sections:
+  1. **`Silent Decisions & Assumptions Made`**: A concise bulleted list of any unprompted technical choices, defaults, thresholds, or trade-offs the agent decided on behalf of the user.
+  2. **`What Checks Did NOT Prove (Unverified Boundaries)`**: An explicit declaration of what the passing test suite did NOT verify (e.g. concurrent race conditions, extreme network latency, unhandled mobile viewport scales). Passing all checks NEVER implies zero bugs.
+- **Do vs Don't**:
+  - ❌ *Don't*: Submit a report saying *"All 42 tests passed, feature complete and robust"* while silently defaulting retry count to 3 and ignoring concurrent double-submits.
+  - ✅ *Do*: State: *"Decisions Made: Defaulted debounce to 300ms, sorted by createdAt desc. Unverified: Concurrent requests under distributed clock drift, and offline sync conflicts."*
